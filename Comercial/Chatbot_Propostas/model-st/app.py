@@ -166,9 +166,7 @@ with st.sidebar:
                 st.session_state.messages = []
                 st.session_state.thread_id = None
                 st.rerun()
-            else:
-                # Reverte a seleção se o usuário não confirmar
-                st.session_state.selected_assistant = st.session_state.assistant_key
+            # Remove a linha que tentava reverter a seleção - isso causava o erro
         else:
             # Se não houver mensagens, apenas muda o assistente
             st.session_state.assistant_key = selected_assistant_key
