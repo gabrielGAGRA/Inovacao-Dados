@@ -33,10 +33,13 @@ DEFAULT_ASSISTANT = "organizador_atas"
 
 # --- Configuração da Página e Estilos ---
 
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Define a configuração da página
 st.set_page_config(
     page_title="ChatGPT Interface",
-    page_icon="assets/img/favicon-32x32.png",
+    page_icon=os.path.join(SCRIPT_DIR, "assets", "img", "favicon-32x32.png"),
     layout="centered",
     initial_sidebar_state="expanded",
 )
@@ -200,7 +203,9 @@ if not st.session_state.messages:
 for msg in st.session_state.messages:
     # Usa avatares customizados para replicar o visual
     avatar_img = (
-        "assets/img/user.png" if msg["role"] == "user" else "assets/img/gpt.png"
+        os.path.join(SCRIPT_DIR, "assets", "img", "user.png")
+        if msg["role"] == "user"
+        else os.path.join(SCRIPT_DIR, "assets", "img", "gpt.png")
     )
     with st.chat_message(msg["role"], avatar=avatar_img):
         st.markdown(msg["content"])
@@ -210,11 +215,15 @@ for msg in st.session_state.messages:
 if prompt := st.chat_input("Digite sua mensagem aqui..."):
     # Adiciona e exibe a mensagem do usuário
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="assets/img/user.png"):
+    with st.chat_message(
+        "user", avatar=os.path.join(SCRIPT_DIR, "assets", "img", "user.png")
+    ):
         st.markdown(prompt)
 
     # Prepara para receber a resposta do assistente
-    with st.chat_message("assistant", avatar="assets/img/gpt.png"):
+    with st.chat_message(
+        "assistant", avatar=os.path.join(SCRIPT_DIR, "assets", "img", "gpt.png")
+    ):
         # Se não houver um thread, cria um novo
         if not st.session_state.thread_id:
             try:
