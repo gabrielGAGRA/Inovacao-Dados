@@ -36,82 +36,39 @@ DEFAULT_ASSISTANT = "organizador_atas"
 # Define a configuração da página
 st.set_page_config(
     page_title="ChatGPT Interface",
-    page_icon="🤖",
+    page_icon="assets/img/favicon-32x32.png",
     layout="centered",
     initial_sidebar_state="expanded",
 )
 
-# CSS customizado para um visual mais próximo do original
+# Aplica o CSS customizado diretamente
 st.markdown(
     """
 <style>
-/* Estilos globais */
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    line-height: 1.6;
+/* Remove a borda padrão do topo do header */
+header[data-testid="stHeader"] {
+    border-top: none;
 }
 
-/* Personalização do chat */
-.stChatMessage {
-    padding: 0.5rem 0;
-}
-
-.stChatMessage .avatar {
-    width: 40px !important;
-    height: 40px !important;
-}
-
-/* Botões e elementos de interface */
-.stButton > button {
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilização da sidebar */
-section[data-testid="stSidebar"] {
-    background-color: #f7f7f8;
-    border-right: 1px solid #e5e5e5;
-}
-
-section[data-testid="stSidebar"] button {
-    background-color: #007acc;
-    color: white;
-    border: none;
+/* Estiliza os containers das mensagens para se parecerem com os balões de chat */
+[data-testid="stChatMessage"] {
+    background-color: #f5f5f5;
+    /* secondaryBackgroundColor */
+    border-radius: 8px;
+    /* --border-radius */
+    padding: 1rem;
     margin-bottom: 1rem;
 }
 
-section[data-testid="stSidebar"] button:hover {
-    background-color: #005999;
+/* Remove o fundo da mensagem do assistente para ter controle total */
+[data-testid="stChatMessage"]:has(img[alt="assistant-avatar"]) {
+    background-color: transparent;
 }
 
-/* Estilização do input de chat */
-div[data-testid="stChatInput"] textarea {
-    border-radius: 8px;
-    border: 1px solid #e5e5e5;
-}
-
-div[data-testid="stChatInput"] textarea:focus {
-    border-color: #007acc;
-    box-shadow: 0 0 0 1px #007acc;
-}
-
-/* Para modo escuro */
-@media (prefers-color-scheme: dark) {
-    section[data-testid="stSidebar"] {
-        background-color: #1e1e1e;
-        border-right: 1px solid #333;
-    }
-    
-    div[data-testid="stChatInput"] textarea {
-        border: 1px solid #333;
-        background-color: #2d2d2d;
-    }
+/* Estilo para avatares */
+img[data-testid="stAvatar"] {
+    width: 32px;
+    height: 32px;
 }
 </style>
 """,
@@ -120,27 +77,12 @@ div[data-testid="stChatInput"] textarea:focus {
 
 # --- Lógica de Backend (Integrada do backend.py) ---
 
-# Importações para o streaming de resposta
-from openai import OpenAI, AssistantEventHandler
-
 try:
     # Inicializa o cliente OpenAI usando as secrets do Streamlit
-    api_key = st.secrets.get("OPENAI_API_KEY", "")
-    if not api_key:
-        # Fallback para variável de ambiente
-        api_key = os.getenv("OPENAI_API_KEY", "")
-
-    if not api_key:
-        st.error(
-            "Chave da API da OpenAI não encontrada. Por favor, configure seus secrets no Streamlit Cloud.",
-            icon="🚨",
-        )
-        st.stop()
-
-    client = OpenAI(api_key=api_key)
+    client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 except Exception as e:
     st.error(
-        f"Erro ao inicializar o cliente OpenAI: {str(e)}",
+        "Chave da API da OpenAI não encontrada. Por favor, configure seus secrets no Streamlit Cloud.",
         icon="🚨",
     )
     st.stop()
@@ -148,6 +90,7 @@ except Exception as e:
 
 # --- Classe para Streaming de Resposta (Melhoria do backend.py) ---
 # Usa o EventHandler para um streaming real e eficiente
+from openai import AssistantEventHandler
 
 
 class StreamingEventHandler(AssistantEventHandler):
@@ -167,42 +110,6 @@ class StreamingEventHandler(AssistantEventHandler):
 
     def get_full_response(self):
         return self.full_response
-
-
-# --- Funções de Utilidade ---
-
-
-def get_avatar_svg(role: str) -> str:
-    """Retorna o SVG para o avatar do usuário ou assistente"""
-    if role == "user":
-        # SVG para o avatar do usuário
-        return """
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="18" cy="18" r="18" fill="#007acc"/>
-            <circle cx="18" cy="14" r="6" fill="white"/>
-            <path d="M7 32c0-6.5 5-11 11-11s11 4.5 11 11" fill="white"/>
-        </svg>
-        """
-    else:
-        # SVG para o avatar do assistente (ChatGPT)
-        return """
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="18" cy="18" r="18" fill="#19c37d"/>
-            <path d="M11 14.5C11 10.91 13.91 8 17.5 8C21.09 8 24 10.91 24 14.5C24 18.09 21.09 21 17.5 21C13.91 21 11 18.09 11 14.5Z" fill="white"/>
-            <path d="M7 29.5C7 25.21 11.21 21 15.5 21H19.5C23.79 21 28 25.21 28 29.5" fill="white"/>
-        </svg>
-        """
-
-
-def get_avatar_html(role: str) -> str:
-    """Retorna o HTML para exibir o avatar como base64"""
-    import base64
-    from io import BytesIO
-
-    svg = get_avatar_svg(role)
-    svg_bytes = svg.encode()
-    b64 = base64.b64encode(svg_bytes).decode()
-    return f"data:image/svg+xml;base64,{b64}"
 
 
 # --- Inicialização do Estado da Sessão ---
@@ -291,9 +198,11 @@ if not st.session_state.messages:
     st.info(f"Como posso te ajudar hoje como {assistant_info.name}?", icon="👋")
 
 for msg in st.session_state.messages:
-    # Usa avatares SVG gerados dinamicamente
-    avatar_url = get_avatar_html(msg["role"])
-    with st.chat_message(msg["role"], avatar=avatar_url):
+    # Usa avatares customizados para replicar o visual
+    avatar_img = (
+        "assets/img/user.png" if msg["role"] == "user" else "assets/img/gpt.png"
+    )
+    with st.chat_message(msg["role"], avatar=avatar_img):
         st.markdown(msg["content"])
 
 
@@ -301,11 +210,11 @@ for msg in st.session_state.messages:
 if prompt := st.chat_input("Digite sua mensagem aqui..."):
     # Adiciona e exibe a mensagem do usuário
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar=get_avatar_html("user")):
+    with st.chat_message("user", avatar="assets/img/user.png"):
         st.markdown(prompt)
 
     # Prepara para receber a resposta do assistente
-    with st.chat_message("assistant", avatar=get_avatar_html("assistant")):
+    with st.chat_message("assistant", avatar="assets/img/gpt.png"):
         # Se não houver um thread, cria um novo
         if not st.session_state.thread_id:
             try:
