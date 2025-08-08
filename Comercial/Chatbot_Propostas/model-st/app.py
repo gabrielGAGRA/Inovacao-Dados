@@ -17,6 +17,11 @@ class AssistantConfig(BaseModel):
 
 
 AVAILABLE_ASSISTANTS: Dict[str, AssistantConfig] = {
+    "ata_para_proposta": AssistantConfig(
+        id="workflow",  # ID especial para o workflow
+        name="Ata Desorganizada para Proposta",
+        description="Automatiza a organização da ata e criação da proposta comercial",
+    ),
     "organizador_atas": AssistantConfig(
         id="asst_gl4svzGMPxoDMYskRHzK62Fk",
         name="Organizador de Atas",
@@ -29,7 +34,120 @@ AVAILABLE_ASSISTANTS: Dict[str, AssistantConfig] = {
     ),
 }
 
-DEFAULT_ASSISTANT = "organizador_atas"
+DEFAULT_ASSISTANT = "ata_para_proposta"
+
+# --- Classe para Streaming de Resposta (Melhoria do backend.py) ---
+# Usa o EventHandler para um streaming real e eficiente
+from openai import AssistantEventHandler
+
+
+class StreamingEventHandler(AssistantEventHandler):
+    def __init__(self, text_placeholder):
+        super().__init__()
+        self.text_placeholder = text_placeholder
+        self.full_response = ""
+
+    def on_text_delta(self, delta, snapshot):
+        # Adiciona o novo trecho de texto ao placeholder e atualiza o conteúdo
+        self.full_response += delta.value
+        self.text_placeholder.markdown(self.full_response + "▌")
+
+    def on_end(self):
+        # Exibe a resposta final sem o cursor
+        self.text_placeholder.markdown(self.full_response)
+
+    def get_full_response(self):
+        return self.full_response
+
+
+# --- Função para processar o workflow de ata para proposta ---
+def process_ata_to_proposal_workflow(user_prompt):
+    """
+    Processa o workflow completo: ata desorganizada -> ata organizada -> proposta
+    """
+    try:
+        # Etapa 1: Organizar a ata
+        st.info("🔄 Organizando a ata...", icon="📝")
+
+        # Criar thread para o organizador de atas
+        thread_ata = client.beta.threads.create()
+
+        # Adicionar mensagem do usuário
+        client.beta.threads.messages.create(
+            thread_id=thread_ata.id, role="user", content=user_prompt
+        )
+
+        # Executar o organizador de atas
+        run_ata = client.beta.threads.runs.create_and_poll(
+            thread_id=thread_ata.id,
+            assistant_id=AVAILABLE_ASSISTANTS["organizador_atas"].id,
+        )
+
+        # Obter a resposta organizada
+        messages_ata = client.beta.threads.messages.list(thread_id=thread_ata.id)
+        ata_organizada = messages_ata.data[0].content[0].text.value
+
+        # Mostrar a ata organizada
+        with st.chat_message(
+            "assistant", avatar=os.path.join(SCRIPT_DIR, "assets", "img", "gpt.png")
+        ):
+            st.markdown("### 📋 Ata Organizada")
+            st.markdown(ata_organizada)
+
+        # Adicionar ao histórico
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": f"### 📋 Ata Organizada\n\n{ata_organizada}",
+            }
+        )
+
+        # Etapa 2: Criar proposta
+        st.info("🔄 Construindo proposta comercial...", icon="💼")
+
+        # Criar thread para o criador de propostas
+        thread_proposta = client.beta.threads.create()
+
+        # Adicionar a ata organizada como input para a proposta
+        client.beta.threads.messages.create(
+            thread_id=thread_proposta.id,
+            role="user",
+            content=f"Com base na seguinte ata organizada, crie uma proposta comercial:\n\n{ata_organizada}",
+        )
+
+        # Executar o criador de propostas
+        run_proposta = client.beta.threads.runs.create_and_poll(
+            thread_id=thread_proposta.id,
+            assistant_id=AVAILABLE_ASSISTANTS["criador_propostas"].id,
+        )
+
+        # Obter a proposta criada
+        messages_proposta = client.beta.threads.messages.list(
+            thread_id=thread_proposta.id
+        )
+        proposta_criada = messages_proposta.data[0].content[0].text.value
+
+        # Mostrar a proposta
+        with st.chat_message(
+            "assistant", avatar=os.path.join(SCRIPT_DIR, "assets", "img", "gpt.png")
+        ):
+            st.markdown("### 💼 Proposta Comercial")
+            st.markdown(proposta_criada)
+
+        # Adicionar ao histórico
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": f"### 💼 Proposta Comercial\n\n{proposta_criada}",
+            }
+        )
+
+        return True
+
+    except Exception as e:
+        st.error(f"Erro durante o processamento do workflow: {e}", icon="🚨")
+        return False
+
 
 # --- Configuração da Página e Estilos ---
 
@@ -218,49 +336,59 @@ if prompt := st.chat_input("Digite sua mensagem aqui..."):
     ):
         st.markdown(prompt)
 
-    # Prepara para receber a resposta do assistente
-    with st.chat_message(
-        "assistant", avatar=os.path.join(SCRIPT_DIR, "assets", "img", "gpt.png")
-    ):
-        # Se não houver um thread, cria um novo
-        if not st.session_state.thread_id:
-            try:
-                thread = client.beta.threads.create()
-                st.session_state.thread_id = thread.id
-            except Exception as e:
-                st.error(f"Erro ao criar a thread: {e}", icon="🚨")
-                st.stop()
-
-        # Adiciona a mensagem do usuário à thread
-        try:
-            client.beta.threads.messages.create(
-                thread_id=st.session_state.thread_id, role="user", content=prompt
-            )
-
-            # Cria o placeholder para a resposta em streaming
-            response_placeholder = st.empty()
-
-            # Inicializa o handler de streaming
-            handler = StreamingEventHandler(response_placeholder)
-
-            # Cria e faz o streaming da run
-            with client.beta.threads.runs.stream(
-                thread_id=st.session_state.thread_id,
-                assistant_id=assistant_info.id,
-                event_handler=handler,
-            ) as stream:
-                # O stream é processado pelo handler em tempo real
-                stream.until_done()
-
-            # Adiciona a resposta completa do assistente ao histórico
-            assistant_response = handler.get_full_response()
-            st.session_state.messages.append(
-                {"role": "assistant", "content": assistant_response}
-            )
-
-        except Exception as e:
-            st.error(
-                f"Ocorreu um erro ao se comunicar com a API da OpenAI: {e}", icon="🚨"
-            )
-            # Remove a última mensagem do usuário para que ele possa tentar novamente
+    # Verifica se é o workflow de ata para proposta
+    if st.session_state.assistant_key == "ata_para_proposta":
+        # Processa o workflow automatizado
+        success = process_ata_to_proposal_workflow(prompt)
+        if not success:
+            # Remove a última mensagem do usuário se houve erro
             st.session_state.messages.pop()
+    else:
+        # Comportamento normal para outros assistentes
+        # Prepara para receber a resposta do assistente
+        with st.chat_message(
+            "assistant", avatar=os.path.join(SCRIPT_DIR, "assets", "img", "gpt.png")
+        ):
+            # Se não houver um thread, cria um novo
+            if not st.session_state.thread_id:
+                try:
+                    thread = client.beta.threads.create()
+                    st.session_state.thread_id = thread.id
+                except Exception as e:
+                    st.error(f"Erro ao criar a thread: {e}", icon="🚨")
+                    st.stop()
+
+            # Adiciona a mensagem do usuário à thread
+            try:
+                client.beta.threads.messages.create(
+                    thread_id=st.session_state.thread_id, role="user", content=prompt
+                )
+
+                # Cria o placeholder para a resposta em streaming
+                response_placeholder = st.empty()
+
+                # Inicializa o handler de streaming
+                handler = StreamingEventHandler(response_placeholder)
+
+                # Cria e faz o streaming da run
+                with client.beta.threads.runs.stream(
+                    thread_id=st.session_state.thread_id,
+                    assistant_id=assistant_info.id,
+                    event_handler=handler,
+                ) as stream:
+                    # O stream é processado pelo handler em tempo real
+                    stream.until_done()
+
+                # Adiciona a resposta completa do assistente ao histórico
+                assistant_response = handler.get_full_response()
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": assistant_response}
+                )
+
+            except Exception as e:
+                st.error(
+                    f"Ocorreu um erro ao se comunicar com a API da OpenAI: {e}",
+                    icon="🚨",
+                )
+                # Remove a última mensagem do usuário para que ele possa tentar novamente
+                st.session_state.messages.pop()
