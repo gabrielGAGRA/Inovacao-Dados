@@ -509,24 +509,8 @@ with st.sidebar:
     # Espaçador para empurrar os logos para o final
     st.markdown("<br>" * 5, unsafe_allow_html=True)
 
-    # Removendo o HTML das imagens placeholder que estava causando conflito
-    # st.markdown(
-    #     """
-    #     <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: auto;">
-    #         <img src="data:image/png;base64,{}" style="height: 50px; width: auto;">
-    #         <img src="data:image/png;base64,{}" style="height: 25px; width: auto;">
-    #     </div>
-    #     """.format(
-    #         # Aqui você precisará converter as imagens para base64 ou usar uma abordagem diferente
-    #         # Por agora, vou usar o método do Streamlit com colunas
-    #         "",
-    #         "",
-    #     ),
-    #     unsafe_allow_html=True,
-    # )
-
-    # Melhorando o layout dos logos com uma única linha
-    logo_col1, logo_col2, logo_col3 = st.columns([1, 3, 2])
+    # Centralizando os logos em uma coluna
+    logo_col1, logo_col2, logo_col3 = st.columns([1, 2, 1])
 
     with logo_col2:
         # Logo NDados centralizada
@@ -536,8 +520,7 @@ with st.sidebar:
             use_container_width=False,
         )
 
-    with logo_col3:
-        # Logo Poli Junior ao lado direito, menor
+        # Logo Poli Junior abaixo da NDados
         st.image(
             os.path.join(SCRIPT_DIR, "assets", "img", "Poli Junior.png"),
             width=50,
