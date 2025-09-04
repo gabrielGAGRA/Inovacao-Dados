@@ -520,7 +520,7 @@ with st.sidebar:
             <div style="position: relative; display: flex; justify-content: center;">
                 <img src="data:image/png;base64,{}" width="100" />
                 <img src="data:image/png;base64,{}" width="60" 
-                     style="position: absolute; bottom: -10px; right: 20px;" />
+                     style="position: absolute; bottom: -30px; right: 40px;" />
             </div>
             """.format(
                 base64.b64encode(
