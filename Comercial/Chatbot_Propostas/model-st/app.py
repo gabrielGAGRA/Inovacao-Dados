@@ -1,5 +1,3 @@
-# streamlit_app.py
-
 import streamlit as st
 import openai
 import time
@@ -7,9 +5,8 @@ import os
 from typing import Dict, List
 from pydantic import BaseModel
 
+
 # --- Modelos de Configuração (de config.py) ---
-
-
 class AssistantConfig(BaseModel):
     id: str
     name: str
@@ -156,7 +153,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Define a configuração da página
 st.set_page_config(
-    page_title="ChatGPT Interface",
+    page_title="Agente Comercial",
     page_icon=os.path.join(SCRIPT_DIR, "assets", "img", "favicon-32x32.png"),
     layout="centered",
     initial_sidebar_state="expanded",
@@ -184,6 +181,7 @@ st.markdown(
     background: var(--background-gradient);
     position: relative;
     font-family: 'Inter', sans-serif;
+    color: #333333;
 }
 
 .main .block-container::before {
@@ -287,10 +285,15 @@ section[data-testid="stSidebar"] > div {
     background: transparent;
 }
 
+/* Força texto escuro em todos os elementos */
+.stApp {
+    color: #333333 !important;
+}
+
 /* Botões personalizados */
 .stButton > button {
     background: linear-gradient(135deg, var(--primary-purple), var(--purple-light));
-    color: white;
+    color: white !important;
     border: none;
     border-radius: 12px;
     font-weight: 600;
@@ -311,6 +314,7 @@ section[data-testid="stSidebar"] > div {
     border: 2px solid var(--purple-ultra-light);
     border-radius: 10px;
     transition: border-color 0.3s ease;
+    color: #333333 !important;
 }
 
 .stSelectbox > div > div:focus-within {
@@ -328,6 +332,7 @@ section[data-testid="stSidebar"] > div {
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 20px rgba(140, 82, 255, 0.1);
     transition: all 0.3s ease;
+    color: #333333 !important;
 }
 
 [data-testid="stChatMessage"]:hover {
@@ -338,7 +343,7 @@ section[data-testid="stSidebar"] > div {
 /* Mensagens do usuário */
 [data-testid="stChatMessage"]:has(img[alt*="user"]) {
     background: linear-gradient(135deg, var(--primary-purple), var(--purple-light));
-    color: white;
+    color: white !important;
     margin-left: 2rem;
 }
 
@@ -346,6 +351,7 @@ section[data-testid="stSidebar"] > div {
 [data-testid="stChatMessage"]:has(img[alt*="assistant"]) {
     background: rgba(255, 255, 255, 0.95);
     margin-right: 2rem;
+    color: #333333 !important;
 }
 
 /* Estilo para avatares */
@@ -372,9 +378,14 @@ img[data-testid="stAvatar"] {
 
 /* Títulos personalizados */
 h1, h2, h3 {
-    color: var(--purple-dark);
+    color: var(--purple-dark) !important;
     font-family: 'Inter', sans-serif;
     font-weight: 700;
+}
+
+/* Texto geral */
+p, div, span, label {
+    color: #333333 !important;
 }
 
 /* Alertas e notificações */
@@ -383,20 +394,7 @@ h1, h2, h3 {
     border-left: 4px solid var(--primary-purple);
     border-radius: 10px;
     backdrop-filter: blur(10px);
-}
-
-/* Logo na sidebar */
-.sidebar-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 2rem;
-    gap: 1rem;
-}
-
-.sidebar-logo img {
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(140, 82, 255, 0.2);
+    color: #333333 !important;
 }
 
 /* Scrollbar personalizada */
@@ -444,31 +442,6 @@ except Exception as e:
     )
     st.stop()
 
-
-# --- Classe para Streaming de Resposta (Melhoria do backend.py) ---
-# Usa o EventHandler para um streaming real e eficiente
-from openai import AssistantEventHandler
-
-
-class StreamingEventHandler(AssistantEventHandler):
-    def __init__(self, text_placeholder):
-        super().__init__()
-        self.text_placeholder = text_placeholder
-        self.full_response = ""
-
-    def on_text_delta(self, delta, snapshot):
-        # Adiciona o novo trecho de texto ao placeholder e atualiza o conteúdo
-        self.full_response += delta.value
-        self.text_placeholder.markdown(self.full_response + "▌")
-
-    def on_end(self):
-        # Exibe a resposta final sem o cursor
-        self.text_placeholder.markdown(self.full_response)
-
-    def get_full_response(self):
-        return self.full_response
-
-
 # --- Inicialização do Estado da Sessão ---
 # O st.session_state é o equivalente do Streamlit ao localStorage ou variáveis de classe do JS
 
@@ -489,24 +462,7 @@ if "assistant_key" not in st.session_state:
 
 # --- Interface da Sidebar (de index.html) ---
 with st.sidebar:
-    # Logos das empresas
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image(
-            os.path.join(SCRIPT_DIR, "assets", "img", "NDados.png"),
-            width=80,
-            use_column_width=False,
-        )
-    with col2:
-        st.image(
-            os.path.join(SCRIPT_DIR, "assets", "img", "Poli Junior.png"),
-            width=80,
-            use_column_width=False,
-        )
-
-    st.markdown("---")
-
-    st.title("💬 ChatGPT Interface")
+    st.title("💬 Agente Comercial")
 
     if st.button("＋ Nova Conversa", use_container_width=True):
         # Reseta o estado da conversa para iniciar um novo chat
@@ -537,7 +493,6 @@ with st.sidebar:
                 st.session_state.messages = []
                 st.session_state.thread_id = None
                 st.rerun()
-            # Remove a linha que tentava reverter a seleção - isso causava o erro
         else:
             # Se não houver mensagens, apenas muda o assistente
             st.session_state.assistant_key = selected_assistant_key
@@ -550,12 +505,47 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.info(
-        "🎨 O tema (Claro/Escuro) pode ser alterado no menu 'Settings' do próprio Streamlit (canto superior direito).",
-        icon="💡",
-    )
+
+    # Espaçador para empurrar os logos para o final
+    st.markdown("<br>" * 5, unsafe_allow_html=True)
+
+    # Logos das empresas no final da sidebar
     st.markdown(
-        "<small>🚀 ChatGPT Interface v2.0 (Streamlit Edition) - Powered by NDados & Poli Junior</small>",
+        """
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: auto;">
+            <img src="data:image/png;base64,{}" style="height: 50px; width: auto;">
+            <img src="data:image/png;base64,{}" style="height: 25px; width: auto;">
+        </div>
+        """.format(
+            # Aqui você precisará converter as imagens para base64 ou usar uma abordagem diferente
+            # Por agora, vou usar o método do Streamlit com colunas
+            "",
+            "",
+        ),
+        unsafe_allow_html=True,
+    )
+
+    # Usando colunas para posicionar os logos
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        # Logo NDados centralizada
+        st.image(
+            os.path.join(SCRIPT_DIR, "assets", "img", "NDados.png"),
+            width=120,
+            use_container_width=False,
+        )
+
+    # Logo Poli Junior pequena ao lado direito
+    col_left, col_right = st.columns([3, 1])
+    with col_right:
+        st.image(
+            os.path.join(SCRIPT_DIR, "assets", "img", "Poli Junior.png"),
+            width=40,
+            use_container_width=False,
+        )
+
+    st.markdown(
+        "<small>🚀 Agente Comercial - NDados & Poli Junior </small>",
         unsafe_allow_html=True,
     )
 
