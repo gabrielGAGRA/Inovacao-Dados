@@ -1,3 +1,4 @@
+import base64
 import streamlit as st
 import openai
 import time
@@ -513,18 +514,28 @@ with st.sidebar:
     logo_col1, logo_col2, logo_col3 = st.columns([1, 2, 1])
 
     with logo_col2:
-        # Logo NDados centralizada
-        st.image(
-            os.path.join(SCRIPT_DIR, "assets", "img", "NDados.png"),
-            width=100,
-            use_container_width=False,
-        )
-
-        # Logo Poli Junior abaixo da NDados
-        st.image(
-            os.path.join(SCRIPT_DIR, "assets", "img", "Poli Junior.png"),
-            width=50,
-            use_container_width=False,
+        # Container para posicionamento diagonal
+        st.markdown(
+            """
+            <div style="position: relative; display: flex; justify-content: center;">
+                <img src="data:image/png;base64,{}" width="100" />
+                <img src="data:image/png;base64,{}" width="30" 
+                     style="position: absolute; bottom: -10px; right: 20px;" />
+            </div>
+            """.format(
+                base64.b64encode(
+                    open(
+                        os.path.join(SCRIPT_DIR, "assets", "img", "NDados.png"), "rb"
+                    ).read()
+                ).decode(),
+                base64.b64encode(
+                    open(
+                        os.path.join(SCRIPT_DIR, "assets", "img", "Poli Junior.png"),
+                        "rb",
+                    ).read()
+                ).decode(),
+            ),
+            unsafe_allow_html=True,
         )
 
     st.markdown(
