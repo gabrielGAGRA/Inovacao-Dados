@@ -155,7 +155,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Define a configuração da página
 st.set_page_config(
     page_title="Agente Comercial",
-    page_icon=os.path.join(SCRIPT_DIR, "assets", "img", "favicon-32x32.png"),
+    page_icon=os.path.join(SCRIPT_DIR, "assets", "img", "NDados.png"),
     layout="centered",
     initial_sidebar_state="expanded",
 )
