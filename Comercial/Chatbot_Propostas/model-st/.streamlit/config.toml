@@ -2,9 +2,9 @@
 
 [theme]
 base="light" # Pode ser "light" ou "dark"
-primaryColor="#007acc"
+primaryColor="#8c52ff"
 backgroundColor="#ffffff"
-secondaryBackgroundColor="#f5f5f5"
+secondaryBackgroundColor="#f8f7ff"
 textColor="#333333"
 font="sans serif"
 

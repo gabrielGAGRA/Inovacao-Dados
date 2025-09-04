@@ -28,7 +28,7 @@ AVAILABLE_ASSISTANTS: Dict[str, AssistantConfig] = {
         description="Especialista em organizar e estruturar atas de reunião",
     ),
     "criador_propostas": AssistantConfig(
-        id="asst_gqDpEGoOpRvpUai7fdVxgg4d",
+        id="asst_Fgsu6icqZ8EqjlnC89TKSLk7",
         name="Criador de Propostas Comerciais",
         description="Especialista em criar propostas comerciais persuasivas",
     ),
@@ -166,30 +166,266 @@ st.set_page_config(
 st.markdown(
     """
 <style>
+/* Importa fontes personalizadas */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Variáveis CSS personalizadas */
+:root {
+    --primary-purple: #8c52ff;
+    --purple-light: #a06eff;
+    --purple-dark: #6b3acc;
+    --purple-ultra-light: rgba(140, 82, 255, 0.1);
+    --purple-semi-light: rgba(140, 82, 255, 0.2);
+    --background-gradient: linear-gradient(135deg, #f8f7ff 0%, #f0ebff 100%);
+}
+
+/* Fundo principal com padrão de dados */
+.main .block-container {
+    background: var(--background-gradient);
+    position: relative;
+    font-family: 'Inter', sans-serif;
+}
+
+.main .block-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        /* Padrão de dados/pontos pequenos */
+        radial-gradient(circle at 10% 10%, var(--purple-ultra-light) 1px, transparent 1px),
+        radial-gradient(circle at 30% 20%, var(--purple-ultra-light) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 50% 15%, var(--purple-ultra-light) 1px, transparent 1px),
+        radial-gradient(circle at 70% 25%, var(--purple-ultra-light) 2px, transparent 2px),
+        radial-gradient(circle at 90% 10%, var(--purple-ultra-light) 1px, transparent 1px),
+        radial-gradient(circle at 85% 30%, var(--purple-ultra-light) 1.5px, transparent 1.5px),
+        
+        /* Segunda camada de dados */
+        radial-gradient(circle at 15% 40%, var(--purple-ultra-light) 1px, transparent 1px),
+        radial-gradient(circle at 35% 45%, var(--purple-ultra-light) 2px, transparent 2px),
+        radial-gradient(circle at 55% 35%, var(--purple-ultra-light) 1px, transparent 1px),
+        radial-gradient(circle at 75% 50%, var(--purple-ultra-light) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 95% 45%, var(--purple-ultra-light) 1px, transparent 1px),
+        
+        /* Terceira camada de dados */
+        radial-gradient(circle at 20% 70%, var(--purple-ultra-light) 2px, transparent 2px),
+        radial-gradient(circle at 40% 65%, var(--purple-ultra-light) 1px, transparent 1px),
+        radial-gradient(circle at 60% 75%, var(--purple-ultra-light) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 80% 70%, var(--purple-ultra-light) 1px, transparent 1px),
+        
+        /* Quarta camada de dados */
+        radial-gradient(circle at 25% 90%, var(--purple-ultra-light) 1px, transparent 1px),
+        radial-gradient(circle at 45% 95%, var(--purple-ultra-light) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 65% 85%, var(--purple-ultra-light) 1px, transparent 1px),
+        radial-gradient(circle at 85% 95%, var(--purple-ultra-light) 2px, transparent 2px),
+        
+        /* Linhas sutis conectando dados */
+        linear-gradient(45deg, transparent 45%, var(--purple-ultra-light) 47%, var(--purple-ultra-light) 48%, transparent 50%),
+        linear-gradient(-45deg, transparent 45%, var(--purple-ultra-light) 47%, var(--purple-ultra-light) 48%, transparent 50%);
+    
+    background-size: 
+        /* Tamanhos variados para simular dados dispersos */
+        80px 80px, 120px 120px, 90px 90px, 110px 110px, 70px 70px, 100px 100px,
+        95px 95px, 130px 130px, 85px 85px, 105px 105px, 75px 75px,
+        140px 140px, 80px 80px, 115px 115px, 90px 90px,
+        125px 125px, 95px 95px, 85px 85px, 135px 135px,
+        /* Linhas de conexão */
+        200px 200px, 180px 180px;
+    
+    background-position: 
+        /* Posições aleatórias para simular distribuição de dados */
+        0 0, 25px 25px, 50px 15px, 75px 35px, 100px 10px, 125px 30px,
+        15px 40px, 45px 60px, 70px 45px, 95px 65px, 120px 50px,
+        20px 80px, 50px 75px, 80px 85px, 110px 80px,
+        30px 100px, 60px 105px, 90px 95px, 120px 110px,
+        /* Linhas */
+        0 0, 100px 100px;
+    
+    opacity: 0.4;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Adiciona padrão extra de dados flutuantes */
+.main .block-container::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        /* Pequenos quadrados e retângulos representando dados */
+        linear-gradient(45deg, var(--purple-ultra-light) 2px, transparent 2px),
+        linear-gradient(-45deg, var(--purple-ultra-light) 1px, transparent 1px),
+        /* Círculos maiores ocasionais */
+        radial-gradient(circle at 33% 33%, var(--purple-ultra-light) 3px, transparent 3px),
+        radial-gradient(circle at 66% 66%, var(--purple-ultra-light) 2.5px, transparent 2.5px);
+    background-size: 150px 150px, 180px 180px, 300px 300px, 250px 250px;
+    background-position: 0 0, 50px 50px, 75px 75px, 125px 125px;
+    opacity: 0.2;
+    z-index: -2;
+    pointer-events: none;
+}
+
 /* Remove a borda padrão do topo do header */
 header[data-testid="stHeader"] {
     border-top: none;
+    background: linear-gradient(90deg, var(--primary-purple), var(--purple-light));
+    height: 4px;
+}
+
+/* Estilização da sidebar */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #ffffff 0%, #faf9ff 100%);
+    border-right: 2px solid var(--purple-ultra-light);
+}
+
+section[data-testid="stSidebar"] > div {
+    background: transparent;
+}
+
+/* Botões personalizados */
+.stButton > button {
+    background: linear-gradient(135deg, var(--primary-purple), var(--purple-light));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(140, 82, 255, 0.3);
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, var(--purple-dark), var(--primary-purple));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(140, 82, 255, 0.4);
+}
+
+/* Selectbox personalizado */
+.stSelectbox > div > div {
+    background-color: white;
+    border: 2px solid var(--purple-ultra-light);
+    border-radius: 10px;
+    transition: border-color 0.3s ease;
+}
+
+.stSelectbox > div > div:focus-within {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px var(--purple-ultra-light);
 }
 
 /* Estiliza os containers das mensagens para se parecerem com os balões de chat */
 [data-testid="stChatMessage"] {
-    background-color: #f5f5f5;
-    /* secondaryBackgroundColor */
-    border-radius: 8px;
-    /* --border-radius */
-    padding: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--purple-ultra-light);
+    border-radius: 16px;
+    padding: 1.5rem;
     margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(140, 82, 255, 0.1);
+    transition: all 0.3s ease;
 }
 
-/* Remove o fundo da mensagem do assistente para ter controle total */
-[data-testid="stChatMessage"]:has(img[alt="assistant-avatar"]) {
-    background-color: transparent;
+[data-testid="stChatMessage"]:hover {
+    box-shadow: 0 6px 25px rgba(140, 82, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Mensagens do usuário */
+[data-testid="stChatMessage"]:has(img[alt*="user"]) {
+    background: linear-gradient(135deg, var(--primary-purple), var(--purple-light));
+    color: white;
+    margin-left: 2rem;
+}
+
+/* Mensagens do assistente */
+[data-testid="stChatMessage"]:has(img[alt*="assistant"]) {
+    background: rgba(255, 255, 255, 0.95);
+    margin-right: 2rem;
 }
 
 /* Estilo para avatares */
 img[data-testid="stAvatar"] {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-purple);
+    box-shadow: 0 2px 10px rgba(140, 82, 255, 0.3);
+}
+
+/* Input de chat personalizado */
+.stChatInput > div {
+    background: white;
+    border: 2px solid var(--purple-ultra-light);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.stChatInput > div:focus-within {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px var(--purple-ultra-light);
+}
+
+/* Títulos personalizados */
+h1, h2, h3 {
+    color: var(--purple-dark);
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+}
+
+/* Alertas e notificações */
+.stAlert {
+    background: rgba(255, 255, 255, 0.9);
+    border-left: 4px solid var(--primary-purple);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+/* Logo na sidebar */
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.sidebar-logo img {
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(140, 82, 255, 0.2);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--purple-ultra-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-purple);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--purple-dark);
+}
+
+/* Animação de loading */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+.loading-text {
+    animation: pulse 1.5s ease-in-out infinite;
 }
 </style>
 """,
@@ -253,7 +489,24 @@ if "assistant_key" not in st.session_state:
 
 # --- Interface da Sidebar (de index.html) ---
 with st.sidebar:
-    st.title("ChatGPT Interface")
+    # Logos das empresas
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image(
+            os.path.join(SCRIPT_DIR, "assets", "img", "NDados.png"),
+            width=80,
+            use_column_width=False,
+        )
+    with col2:
+        st.image(
+            os.path.join(SCRIPT_DIR, "assets", "img", "Poli Junior.png"),
+            width=80,
+            use_column_width=False,
+        )
+
+    st.markdown("---")
+
+    st.title("💬 ChatGPT Interface")
 
     if st.button("＋ Nova Conversa", use_container_width=True):
         # Reseta o estado da conversa para iniciar um novo chat
@@ -261,7 +514,7 @@ with st.sidebar:
         st.session_state.thread_id = None
         st.rerun()
 
-    st.header("Configurações")
+    st.header("⚙️ Configurações")
 
     # Seletor de Assistente
     assistant_options = {
@@ -269,7 +522,7 @@ with st.sidebar:
     }
 
     selected_assistant_key = st.selectbox(
-        label="Assistente:",
+        label="🤖 Assistente:",
         options=assistant_options.keys(),
         format_func=lambda key: assistant_options[key],
         key="selected_assistant",
@@ -298,11 +551,11 @@ with st.sidebar:
 
     st.markdown("---")
     st.info(
-        "O tema (Claro/Escuro) pode ser alterado no menu 'Settings' do próprio Streamlit (canto superior direito).",
-        icon="🎨",
+        "🎨 O tema (Claro/Escuro) pode ser alterado no menu 'Settings' do próprio Streamlit (canto superior direito).",
+        icon="💡",
     )
     st.markdown(
-        "<small>ChatGPT Interface v2.0 (Streamlit Edition)</small>",
+        "<small>🚀 ChatGPT Interface v2.0 (Streamlit Edition) - Powered by NDados & Poli Junior</small>",
         unsafe_allow_html=True,
     )
 
