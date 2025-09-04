@@ -509,38 +509,38 @@ with st.sidebar:
     # Espaçador para empurrar os logos para o final
     st.markdown("<br>" * 5, unsafe_allow_html=True)
 
-    # Logos das empresas no final da sidebar
-    st.markdown(
-        """
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: auto;">
-            <img src="data:image/png;base64,{}" style="height: 50px; width: auto;">
-            <img src="data:image/png;base64,{}" style="height: 25px; width: auto;">
-        </div>
-        """.format(
-            # Aqui você precisará converter as imagens para base64 ou usar uma abordagem diferente
-            # Por agora, vou usar o método do Streamlit com colunas
-            "",
-            "",
-        ),
-        unsafe_allow_html=True,
-    )
+    # Removendo o HTML das imagens placeholder que estava causando conflito
+    # st.markdown(
+    #     """
+    #     <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: auto;">
+    #         <img src="data:image/png;base64,{}" style="height: 50px; width: auto;">
+    #         <img src="data:image/png;base64,{}" style="height: 25px; width: auto;">
+    #     </div>
+    #     """.format(
+    #         # Aqui você precisará converter as imagens para base64 ou usar uma abordagem diferente
+    #         # Por agora, vou usar o método do Streamlit com colunas
+    #         "",
+    #         "",
+    #     ),
+    #     unsafe_allow_html=True,
+    # )
 
-    # Usando colunas para posicionar os logos
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
+    # Melhorando o layout dos logos com uma única linha
+    logo_col1, logo_col2, logo_col3 = st.columns([1, 3, 2])
+
+    with logo_col2:
         # Logo NDados centralizada
         st.image(
             os.path.join(SCRIPT_DIR, "assets", "img", "NDados.png"),
-            width=120,
+            width=100,
             use_container_width=False,
         )
 
-    # Logo Poli Junior pequena ao lado direito
-    col_left, col_right = st.columns([3, 1])
-    with col_right:
+    with logo_col3:
+        # Logo Poli Junior ao lado direito, menor
         st.image(
             os.path.join(SCRIPT_DIR, "assets", "img", "Poli Junior.png"),
-            width=40,
+            width=50,
             use_container_width=False,
         )
 
@@ -548,7 +548,6 @@ with st.sidebar:
         "<small>🚀 Agente Comercial - NDados & Poli Junior </small>",
         unsafe_allow_html=True,
     )
-
 
 # --- Interface Principal do Chat ---
 
